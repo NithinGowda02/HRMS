@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block auth_content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-glow"></div>
+    <div class="login-brand">
+      <div class="brand-icon" style="width:40px;height:40px;border-radius:10px;background:#2563eb;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;">HR</div>
+      <span style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;">HRMS</span>
+    </div>
+    <h2 class="login-title">Welcome back</h2>
+    <p class="login-sub">Employees can sign in with their employee ID. HR can continue using admin credentials.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" style="margin:0 0 16px;">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="form-group">
+        <label>Employee ID or Username</label>
+        <input name="username" type="text" placeholder="Enter employee ID or admin username" required autofocus>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input name="password" type="password" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="justify-content:center;padding:12px;margin-top:4px;">Sign In</button>
+    </form>
+
+    <div class="login-note">
+      <strong>Employee login:</strong> use your employee ID as the login ID and the password shared by HR.
+    </div>
+  </div>
+</div>
+{% endblock %}

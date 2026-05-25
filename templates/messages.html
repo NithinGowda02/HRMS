@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Messages - HRMS{% endblock %}
+{% block page_title %}{% if session.role == 'admin' %}Employee Queries{% else %}Messages to HR{% endif %}{% endblock %}
+
+{% block topbar_action %}
+  {% if session.role == 'employee' %}
+  <a href="#new-query" class="btn btn-primary">+ New Query</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="employee-dashboard-grid">
+  {% if session.role == 'employee' %}
+  <div class="card" id="new-query">
+    <div class="card-header">
+      <span class="card-title">Send a Query to HR</span>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Subject</label>
+            <input name="subject" required placeholder="Example: Salary slip, leave approval, policy question">
+          </div>
+          <div class="form-group full">
+            <label>Your Message</label>
+            <textarea name="message" required placeholder="Write your question clearly so HR can help faster."></textarea>
+          </div>
+        </div>
+        <div style="margin-top:18px;">
+          <button type="submit" class="btn btn-primary">Send to HR</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">{% if session.role == 'admin' %}Incoming Queries{% else %}Conversation History{% endif %}</span>
+    </div>
+    <div class="card-body">
+      {% if messages %}
+      <div class="message-stack">
+        {% for item in messages %}
+        <div class="message-thread">
+          <div class="message-preview-top">
+            <div>
+              <div class="message-subject">{{ item.subject }}</div>
+              <div class="message-meta">
+                {% if session.role == 'admin' %}
+                  {{ item.employee.first_name }} {{ item.employee.last_name }} · {{ item.employee.emp_number }}
+                {% else %}
+                  Sent on {{ item.created_on.strftime('%d %b %Y %I:%M %p') }}
+                {% endif %}
+              </div>
+            </div>
+            <span class="badge {% if item.status == 'resolved' %}badge-success{% else %}badge-warning{% endif %}">{{ item.status|capitalize }}</span>
+          </div>
+
+          <div class="message-bubble employee-bubble">
+            <span class="profile-info-label">Employee Query</span>
+            <p>{{ item.message }}</p>
+          </div>
+
+          {% if item.hr_reply %}
+          <div class="message-bubble hr-bubble">
+            <span class="profile-info-label">HR Reply</span>
+            <p>{{ item.hr_reply }}</p>
+          </div>
+          {% endif %}
+
+          {% if session.role == 'admin' %}
+            {% if item.status == 'open' %}
+            <form method="POST" action="{{ url_for('reply_message', id=item.id) }}" class="reply-form">
+              <div class="form-group full">
+                <label>Reply to Employee</label>
+                <textarea name="reply" required placeholder="Respond to this query"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Send Reply</button>
+            </form>
+            {% else %}
+            <div class="soft-note">Resolved on {{ item.replied_on.strftime('%d %b %Y %I:%M %p') if item.replied_on else 'N/A' }}</div>
+            {% endif %}
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <p>{% if session.role == 'admin' %}No employee queries yet.{% else %}No messages yet. Send your first query to HR.{% endif %}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

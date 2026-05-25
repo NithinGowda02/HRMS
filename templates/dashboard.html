@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - HRMS{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if dashboard_type == 'admin' %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+    </div>
+    <div><div class="stat-value">{{ total_emp }}</div><div class="stat-label">Total Employees</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div><div class="stat-value">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div><div class="stat-value">{{ open_queries }}</div><div class="stat-label">Open Employee Queries</div></div>
+  </div>
+</div>
+
+<div class="dash-grid dash-grid-wide">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Quick Actions</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px;">
+      <a href="{{ url_for('add_employee') }}" class="btn btn-primary">+ Add Employee</a>
+      <a href="{{ url_for('attendance') }}" class="btn btn-outline">Mark Attendance</a>
+      <a href="{{ url_for('payroll') }}" class="btn btn-outline">Generate Payroll</a>
+      <a href="{{ url_for('add_interview') }}" class="btn btn-outline">Schedule Interview</a>
+      <a href="{{ url_for('messages') }}" class="btn btn-outline">Review Queries</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Employee Queries</span>
+      <a href="{{ url_for('messages') }}" class="btn btn-sm btn-outline">Open Inbox</a>
+    </div>
+    <div class="card-body">
+      {% if recent_messages %}
+        <div class="message-stack">
+          {% for item in recent_messages %}
+          <div class="message-preview">
+            <div class="message-preview-top">
+              <div>
+                <div class="message-subject">{{ item.subject }}</div>
+                <div class="message-meta">{{ item.employee.first_name }} {{ item.employee.last_name }} · {{ item.employee.emp_number }}</div>
+              </div>
+              <span class="badge {% if item.status == 'resolved' %}badge-success{% else %}badge-warning{% endif %}">{{ item.status|capitalize }}</span>
+            </div>
+            <p>{{ item.message }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state"><p>No employee queries yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Upcoming Interviews</span>
+      <a href="{{ url_for('add_interview') }}" class="btn btn-sm btn-primary">+ Add</a>
+    </div>
+    <div class="card-body" style="padding:12px 16px;">
+      {% if interviews %}
+      <div class="interview-grid">
+        {% for iv in interviews %}
+        <div class="interview-card">
+          <div class="interview-info">
+            <div class="dept">{{ iv.department or iv.position }}</div>
+            <div class="candidate">{{ iv.candidate_name }}</div>
+          </div>
+          <div class="interview-actions">
+            <a href="{{ url_for('interview_action', id=iv.id, action='accepted') }}" class="btn btn-sm btn-success">Accept</a>
+            <a href="{{ url_for('interview_action', id=iv.id, action='rejected') }}" class="btn btn-sm btn-danger">Reject</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><p>No pending interviews.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% else %}
+<section class="profile-hero">
+  {% if employee %}
+  <div class="profile-identity">
+    <div class="profile-avatar">{{ employee.first_name[0] }}{{ employee.last_name[0] }}</div>
+    <div>
+      <p class="eyebrow">Employee Workspace</p>
+      <h2>{{ employee.first_name }} {{ employee.last_name }}</h2>
+      <p class="profile-subline">{{ employee.position or 'Team Member' }} · {{ employee.department or 'Department not set' }}</p>
+      <div class="profile-chips">
+        <span class="profile-chip">Employee ID: {{ employee.emp_number }}</span>
+        <span class="profile-chip">Joined: {{ employee.joined_date.strftime('%d %b %Y') if employee.joined_date else 'N/A' }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="profile-actions">
+    <a href="{{ url_for('messages') }}" class="btn btn-primary">Message HR</a>
+    <a href="{{ url_for('leaves') }}" class="btn btn-outline">View My Leaves</a>
+  </div>
+  {% else %}
+  <div class="empty-state"><p>Your account is not linked to an employee profile yet.</p></div>
+  {% endif %}
+</section>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <div><div class="stat-value">{{ attendance_status|capitalize }}</div><div class="stat-label">Today's Attendance</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon yellow">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div><div class="stat-value">{{ pending_leave_count }}</div><div class="stat-label">Pending Leave Requests</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    </div>
+    <div><div class="stat-value">{% if latest_payroll %}{{ latest_payroll.net }}{% else %}N/A{% endif %}</div><div class="stat-label">Latest Net Pay</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div><div class="stat-value">{{ recent_messages|length }}</div><div class="stat-label">Recent HR Conversations</div></div>
+  </div>
+</div>
+
+<div class="employee-dashboard-grid">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Profile Snapshot</span>
+    </div>
+    <div class="card-body">
+      {% if employee %}
+      <div class="profile-info-grid">
+        <div class="profile-info-item">
+          <span class="profile-info-label">Email</span>
+          <strong>{{ employee.email or 'Not added' }}</strong>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Department</span>
+          <strong>{{ employee.department or 'Not assigned' }}</strong>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Position</span>
+          <strong>{{ employee.position or 'Not assigned' }}</strong>
+        </div>
+        <div class="profile-info-item">
+          <span class="profile-info-label">Leave Applications</span>
+          <strong>{{ leave_count }}</strong>
+        </div>
+      </div>
+      {% else %}
+      <p>Your employee profile is missing.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Pay & Leave Summary</span>
+    </div>
+    <div class="card-body">
+      <div class="summary-strip">
+        <div class="summary-pill">
+          <span>Pending Leave</span>
+          <strong>{{ pending_leave_count }}</strong>
+        </div>
+        <div class="summary-pill">
+          <span>Latest Payroll</span>
+          <strong>{% if latest_payroll %}{{ latest_payroll.month }}/{{ latest_payroll.year }}{% else %}Not ready{% endif %}</strong>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <a href="{{ url_for('apply_leave') }}" class="btn btn-primary">Apply Leave</a>
+        <a href="{{ url_for('messages') }}" class="btn btn-outline">Open Messages</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Latest Messages From HR</span>
+      <a href="{{ url_for('messages') }}" class="btn btn-sm btn-outline">View All</a>
+    </div>
+    <div class="card-body">
+      {% if recent_messages %}
+      <div class="message-stack">
+        {% for item in recent_messages %}
+        <div class="message-preview">
+          <div class="message-preview-top">
+            <div class="message-subject">{{ item.subject }}</div>
+            <span class="badge {% if item.status == 'resolved' %}badge-success{% else %}badge-warning{% endif %}">{{ item.status|capitalize }}</span>
+          </div>
+          <p>{{ item.message }}</p>
+          {% if item.hr_reply %}
+          <div class="reply-bubble">
+            <span class="profile-info-label">HR Reply</span>
+            <strong>{{ item.hr_reply }}</strong>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><p>No messages yet. Use Message HR to send a query.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Interviews – HRMS{% endblock %}
+{% block page_title %}Interviews{% endblock %}
+{% block topbar_action %}
+  <a href="{{ url_for('add_interview') }}" class="btn btn-primary">+ Schedule</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">All Interviews</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Candidate</th><th>Position</th><th>Department</th><th>Scheduled</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for iv in interviews %}
+        <tr>
+          <td style="font-weight:500;">{{ iv.candidate_name }}</td>
+          <td>{{ iv.position }}</td>
+          <td>{{ iv.department }}</td>
+          <td>{{ iv.scheduled_date.strftime('%d %b %Y') if iv.scheduled_date else '—' }}</td>
+          <td>
+            {% if iv.status == 'accepted' %}<span class="badge badge-success">Accepted</span>
+            {% elif iv.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+            {% else %}<span class="badge badge-warning">Pending</span>{% endif %}
+          </td>
+          <td>
+            {% if iv.status == 'pending' %}
+            <a href="{{ url_for('interview_action', id=iv.id, action='accepted') }}" class="btn btn-sm btn-success">Accept</a>
+            <a href="{{ url_for('interview_action', id=iv.id, action='rejected') }}" class="btn btn-sm btn-danger">Reject</a>
+            {% else %}
+            <span style="font-size:12px;color:#9ca3af;">Done</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state"><p>No interviews scheduled.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Payroll – HRMS{% endblock %}
+{% block page_title %}Payroll{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;">
+
+  <!-- Generate Form -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Generate Payslip</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('generate_payroll') }}" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="form-group">
+          <label>Employee</label>
+          <select name="employee_id" required>
+            <option value="">Select employee</option>
+            {% for emp in employees %}
+            <option value="{{ emp.id }}">{{ emp.first_name }} {{ emp.last_name }} ({{ emp.emp_number }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Month</label>
+          <select name="month" required>
+            {% for i in range(1,13) %}
+            <option value="{{ i }}">{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i-1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <input name="year" type="number" value="2025" min="2020" max="2030" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate</button>
+      </form>
+      <div style="margin-top:16px;font-size:12px;color:#9ca3af;padding:10px 12px;background:#f9fafb;border-radius:8px;">
+        Deduction: 12% of basic salary
+      </div>
+    </div>
+  </div>
+
+  <!-- Payroll Records -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Payroll Records</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Employee</th><th>Month / Year</th><th>Basic</th><th>Deduction</th><th>Net Pay</th></tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td>
+              <div style="font-weight:500;">{{ r.employee.first_name }} {{ r.employee.last_name }}</div>
+              <div style="font-size:12px;color:#6b7280;">{{ r.employee.emp_number }}</div>
+            </td>
+            <td>{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][r.month-1] }} {{ r.year }}</td>
+            <td>₹{{ "{:,.0f}".format(r.basic) }}</td>
+            <td style="color:#ef4444;">-₹{{ "{:,.0f}".format(r.deduction) }}</td>
+            <td><strong style="color:#10b981;">₹{{ "{:,.0f}".format(r.net) }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5"><div class="empty-state"><p>No payroll records yet.</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

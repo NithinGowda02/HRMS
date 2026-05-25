@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Schedule Interview – HRMS{% endblock %}
+{% block page_title %}Schedule Interview{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:540px;">
+  <div class="card-header">
+    <span class="card-title">New Interview</span>
+    <a href="{{ url_for('interviews') }}" class="btn btn-sm btn-outline">← Back</a>
+  </div>
+  <div class="card-body">
+    <form method="POST" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Candidate Name</label>
+          <input name="candidate_name" required placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Position Applied</label>
+          <input name="position" placeholder="e.g. Driver">
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <input name="department" placeholder="e.g. Operations">
+        </div>
+        <div class="form-group">
+          <label>Scheduled Date</label>
+          <input name="scheduled_date" type="date">
+        </div>
+        <div class="form-group full">
+          <label>Notes</label>
+          <textarea name="notes" placeholder="Any notes about the candidate..."></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn btn-primary">Schedule</button>
+        <a href="{{ url_for('interviews') }}" class="btn btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

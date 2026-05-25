@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Attendance – HRMS{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:700px;">
+  <div class="card-header">
+    <span class="card-title">Mark Attendance — {{ today.strftime('%d %B %Y') }}</span>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <input type="hidden" name="mark_date" value="{{ today }}">
+      {% for emp in employees %}
+      <div class="attendance-row">
+        <div>
+          <div class="att-name">{{ emp.first_name }} {{ emp.last_name }}</div>
+          <div class="att-dept">{{ emp.department }} · {{ emp.emp_number }}</div>
+        </div>
+        <div class="att-toggle">
+          {% set current = records.get(emp.id, 'present') %}
+          <label>
+            <input type="radio" name="status_{{ emp.id }}" value="present" {% if current == 'present' %}checked{% endif %}>
+            <span class="badge badge-success">Present</span>
+          </label>
+          <label>
+            <input type="radio" name="status_{{ emp.id }}" value="absent" {% if current == 'absent' %}checked{% endif %}>
+            <span class="badge badge-danger">Absent</span>
+          </label>
+          <label>
+            <input type="radio" name="status_{{ emp.id }}" value="leave" {% if current == 'leave' %}checked{% endif %}>
+            <span class="badge badge-warning">Leave</span>
+          </label>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state"><p>No employees added yet.</p></div>
+      {% endfor %}
+      {% if employees %}
+      <div style="margin-top:24px;">
+        <button type="submit" class="btn btn-primary">Save Attendance</button>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

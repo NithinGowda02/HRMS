@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Leaves – HRMS{% endblock %}
+{% block page_title %}Leave Requests{% endblock %}
+{% block topbar_action %}
+  {% if session.role == 'employee' %}
+  <a href="{{ url_for('apply_leave') }}" class="btn btn-primary">+ Apply Leave</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">{% if session.role == 'admin' %}All Leave Requests{% else %}My Leaves{% endif %}</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          {% if session.role == 'admin' %}<th>Employee</th>{% endif %}
+          <th>From</th><th>To</th><th>Reason</th><th>Status</th>
+          {% if session.role == 'admin' %}<th>Actions</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for lv in leaves %}
+        <tr>
+          {% if session.role == 'admin' %}
+          <td>
+            <div style="font-weight:500;">{{ lv.employee.first_name }} {{ lv.employee.last_name }}</div>
+            <div style="font-size:12px;color:#6b7280;">{{ lv.employee.department }}</div>
+          </td>
+          {% endif %}
+          <td>{{ lv.start_date.strftime('%d %b %Y') }}</td>
+          <td>{{ lv.end_date.strftime('%d %b %Y') }}</td>
+          <td style="max-width:200px;color:#6b7280;">{{ lv.reason }}</td>
+          <td>
+            {% if lv.status == 'approved' %}<span class="badge badge-success">Approved</span>
+            {% elif lv.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+            {% else %}<span class="badge badge-warning">Pending</span>{% endif %}
+          </td>
+          {% if session.role == 'admin' and lv.status == 'pending' %}
+          <td>
+            <a href="{{ url_for('leave_action', id=lv.id, action='approved') }}" class="btn btn-sm btn-success">Approve</a>
+            <a href="{{ url_for('leave_action', id=lv.id, action='rejected') }}" class="btn btn-sm btn-danger">Reject</a>
+          </td>
+          {% elif session.role == 'admin' %}
+          <td><span style="font-size:12px;color:#9ca3af;">Done</span></td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state"><p>No leave records.</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
