@@ -8,7 +8,7 @@ import string
 import os
 
 app = Flask(__name__)
-app.secret_key = 'hrms-secret-key-2024'
+app.secret_key = os.environ.get('SECRET_KEY', 'fallback-dev-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hrms.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
